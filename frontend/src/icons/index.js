@@ -1,0 +1,19 @@
+const IconStub = { template: '<span></span>' }
+
+export const GridIcon = IconStub;
+export const CalenderIcon = IconStub;
+export const UserCircleIcon = IconStub;
+export const ChatIcon = IconStub;
+export const MailIcon = IconStub;
+export const DocsIcon = IconStub;
+export const PieChartIcon = IconStub;
+export const ChevronDownIcon = IconStub;
+export const HorizontalDots = IconStub;
+export const PageIcon = IconStub;
+export const TableIcon = IconStub;
+export const ListIcon = IconStub;
+export const PlugInIcon = IconStub;
+export const BoxCubeIcon = IconStub;
+export const LogoutIcon = IconStub;
+export const SettingsIcon = IconStub;
+export const InfoCircleIcon = IconStub;

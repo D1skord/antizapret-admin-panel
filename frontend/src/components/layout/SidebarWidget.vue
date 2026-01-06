@@ -1,0 +1,1 @@
+<template><div><!-- SidebarWidget --></div></template>

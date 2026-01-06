@@ -1,0 +1,4 @@
+# Mock setup file
+# These variables are used in client.sh to generate filenames.
+OPENVPN_HOST="mock.openvpn.host"
+WIREGUARD_HOST="mock.wireguard.host"
