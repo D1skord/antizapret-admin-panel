@@ -30,7 +30,7 @@ const chartOptions = ref({
   },
   colors: ['#465FFF', '#9CB9FF'],
   chart: {
-    fontFamily: 'Outfit, sans-serif',
+    fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     type: 'area',
     toolbar: {
       show: false,

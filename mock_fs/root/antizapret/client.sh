@@ -40,12 +40,6 @@ askClientName(){
 	fi
 }
 
-# This function is not used in the mock script for client cert expiration
-# but kept for compatibility with the original script's call signature.
-askClientCertExpire(){
-    :
-}
-
 setServerHost_FileName(){
 	if [[ -z "$1" ]]; then
 		SERVER_HOST="$SERVER_IP"
@@ -59,8 +53,18 @@ setServerHost_FileName(){
 }
 
 setServerIP(){
-    # Mocked IP
-	SERVER_IP="1.2.3.4"
+    # Получаем внешний IP
+    SERVER_IP=$(curl -s https://ifconfig.me)
+
+    # Фолбек на локальный IP, если curl не сработал
+    if [[ -z "$SERVER_IP" ]]; then
+        SERVER_IP=$(hostname -I | awk '{print $1}')
+    fi
+
+    if [[ -z "$SERVER_IP" ]]; then
+         echo "Could not detect IP, using localhost"
+         SERVER_IP="127.0.0.1"
+    fi
 }
 
 # No-op render function
@@ -74,28 +78,29 @@ initOpenVPN(){
 }
 
 addOpenVPN(){
-	setServerHost_FileName "$OPENVPN_HOST"
-	
-    # Create a dummy file to be listed by listOpenVPN
-    touch "$ETC_PATH/openvpn/easyrsa3/pki/issued/$CLIENT_NAME.crt"
+  setServerHost_FileName "$OPENVPN_HOST"
 
-    # Create dummy config files
-	echo "Mock OpenVPN config for ${CLIENT_NAME}" > "$ROOT_PATH/client/openvpn/antizapret/antizapret-$FILE_NAME.ovpn"
-	echo "Mock OpenVPN config for ${CLIENT_NAME}" > "$ROOT_PATH/client/openvpn/antizapret-udp/antizapret-$FILE_NAME-udp.ovpn"
-	echo "Mock OpenVPN config for ${CLIENT_NAME}" > "$ROOT_PATH/client/openvpn/antizapret-tcp/antizapret-$FILE_NAME-tcp.ovpn"
-	echo "Mock OpenVPN config for ${CLIENT_NAME}" > "$ROOT_PATH/client/openvpn/vpn/vpn-$FILE_NAME.ovpn"
-	echo "Mock OpenVPN config for ${CLIENT_NAME}" > "$ROOT_PATH/client/openvpn/vpn-udp/vpn-$FILE_NAME-udp.ovpn"
-	echo "Mock OpenVPN config for ${CLIENT_NAME}" > "$ROOT_PATH/client/openvpn/vpn-tcp/vpn-$FILE_NAME-tcp.ovpn"
+  if [[ -n "$CLIENT_CERT_EXPIRE" ]]; then
+    echo "Mock cert for client '$CLIENT_NAME' will expire in $CLIENT_CERT_EXPIRE days."
+  fi
 
-	echo "Mock OpenVPN profile files created for client '$CLIENT_NAME'"
+  # Создаем структуру папок (флаг -p создаст вложенные папки и не упадет, если они уже есть)
+  mkdir -p "$ROOT_PATH/client/openvpn/"{antizapret,antizapret-udp,antizapret-tcp,vpn,vpn-udp,vpn-tcp}
+
+  # Create dummy config files
+  echo "Mock OpenVPN config for ${CLIENT_NAME}" > "$ROOT_PATH/client/openvpn/antizapret/antizapret-$FILE_NAME.ovpn"
+  echo "Mock OpenVPN config for ${CLIENT_NAME}" > "$ROOT_PATH/client/openvpn/antizapret-udp/antizapret-$FILE_NAME-udp.ovpn"
+  echo "Mock OpenVPN config for ${CLIENT_NAME}" > "$ROOT_PATH/client/openvpn/antizapret-tcp/antizapret-$FILE_NAME-tcp.ovpn"
+  echo "Mock OpenVPN config for ${CLIENT_NAME}" > "$ROOT_PATH/client/openvpn/vpn/vpn-$FILE_NAME.ovpn"
+  echo "Mock OpenVPN config for ${CLIENT_NAME}" > "$ROOT_PATH/client/openvpn/vpn-udp/vpn-$FILE_NAME-udp.ovpn"
+  echo "Mock OpenVPN config for ${CLIENT_NAME}" > "$ROOT_PATH/client/openvpn/vpn-tcp/vpn-$FILE_NAME-tcp.ovpn"
+
+  echo "Mock OpenVPN profile files created for client '$CLIENT_NAME'"
 }
 
 deleteOpenVPN(){
 	setServerHost_FileName "$OPENVPN_HOST"
 	echo
-	
-    # Delete the dummy file
-    rm -f "$ETC_PATH/openvpn/easyrsa3/pki/issued/$CLIENT_NAME.crt"
 
     # Delete dummy config files
 	rm -f $ROOT_PATH/client/openvpn/antizapret/antizapret-$FILE_NAME.ovpn
@@ -184,8 +189,8 @@ backup(){
     echo "This is a mock backup. No files will be created."
 }
 
-source "$ROOT_PATH/setup"
-umask 022
+#source "$ROOT_PATH/setup"
+#umask 022
 setServerIP
 
 OPTION=$1

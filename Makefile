@@ -8,7 +8,7 @@ LOCAL_BIN := $(CURDIR)/bin
 AIR_CMD := $(LOCAL_BIN)/air
 # --- End Tooling Setup ---
 
-BINARY_NAME=antizapret-admin
+BINARY_NAME=antizapret-admin-panel
 FRONTEND_DIR=./frontend
 
 help:
@@ -20,6 +20,7 @@ help:
 	@echo "  dev-backend    Run the backend development server with hot-reload."
 	@echo "  dev-frontend   Run the frontend development server."
 	@echo "  build          Build the production-ready binary."
+	@echo "  build-release  Build the production-ready binary for Linux (amd64)."
 	@echo "  install-deps   Install all Go and Node.js dependencies."
 
 # Development
@@ -58,6 +59,14 @@ build:
 	@echo "Building Go binary..."
 	@go build -o $(BINARY_NAME)
 	@echo "Build complete: ./${BINARY_NAME}"
+
+# Build for Linux (Release)
+build-release:
+	@echo "Building frontend assets..."
+	@cd $(FRONTEND_DIR) && npm install && npm run build
+	@echo "Building Go binary for Linux..."
+	@GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o $(BINARY_NAME)
+	@echo "Release build complete: ./$(BINARY_NAME)"
 
 # Dependencies
 install-deps:

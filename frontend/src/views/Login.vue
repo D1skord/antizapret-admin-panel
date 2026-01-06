@@ -161,7 +161,7 @@
       // Часто это объект: await authStore.login({ email: username.value, password: password.value, remember: rememberMe.value })
       // Или позиционные аргументы. Здесь я оставил как у вас, но добавил rememberMe
 
-      await authStore.login(password.value, username.value, rememberMe.value)
+      await authStore.login(username.value, password.value)
 
       if (authStore.isAuthenticated) {
         await router.push('/')

@@ -1,0 +1,67 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Build and Release for Linux
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.25.5'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: make install-deps
+
+      - name: Build Frontend
+        run: |
+          cd frontend
+          npm install
+          npm run build
+
+      - name: Build Go Binary
+        run: |
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o antizapret-admin-panel main.go
+
+      - name: Prepare Release Archive
+        run: |
+          # Создаем структуру папок для архива
+          mkdir -p release_pack/deploy
+          
+          # Копируем бинарник в корень
+          cp antizapret-admin-panel release_pack/
+          
+          # Копируем сервисные файлы в папку deploy
+          cp deploy/antizapret-admin.service release_pack/deploy/
+          cp deploy/uninstall.sh release_pack/deploy/
+          
+          # (Опционально) Копируем README
+          cp README.md release_pack/ || true
+          
+          # Создаем архив
+          # Имя архива важно, так как install.sh ищет "...linux-amd64.tar.gz"
+          tar -czvf antizapret-admin-linux-amd64.tar.gz -C release_pack .
+
+      - name: Create Release and Upload Asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            antizapret-admin-linux-amd64.tar.gz
+            deploy/install.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

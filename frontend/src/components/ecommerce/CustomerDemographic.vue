@@ -87,7 +87,7 @@ const initMap = () => {
       zoomButtons: false,
       regionStyle: {
         initial: {
-          fontFamily: 'Outfit',
+          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
           fill: '#D9D9D9',
         },
         hover: {

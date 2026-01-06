@@ -1,0 +1,24 @@
+[Unit]
+Description=Antizapret Admin Panel Service
+After=network.target
+
+[Service]
+# Тип simple подходит для Go бинарников
+Type=simple
+
+# Путь к бинарнику. Скрипт установки положит его сюда.
+ExecStart=/usr/local/bin/antizapret-admin-panel
+
+# Автоматический рестарт при падении
+Restart=always
+RestartSec=5
+
+# Рабочая директория (важно, если приложение читает файлы рядом с собой)
+# Мы создадим эту папку в install.sh для хранения данных (если понадобится)
+WorkingDirectory=/usr/local/share/antizapret-admin
+
+# Пользователь. Для управления VPN (ip route, iptables)
+User=root
+
+[Install]
+WantedBy=multi-user.target

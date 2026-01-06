@@ -386,9 +386,9 @@ backup(){
 	echo "Backup configuration and clients (re)created at $BACKUP_FILE"
 }
 
-source /root/antizapret/setup
-umask 022
-setServerIP
+#source /root/antizapret/setup
+#umask 022
+#setServerIP
 
 OPTION=$1
 CLIENT_NAME=$2

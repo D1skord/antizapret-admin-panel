@@ -17,9 +17,9 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function login(password) {
+  async function login(username, password) {
     try {
-      const response = await api.post('/api/login', { password });
+      const response = await api.post('/api/login', { username, password });
       setToken(response.data.token);
       await router.push('/');
     } catch (error) {
