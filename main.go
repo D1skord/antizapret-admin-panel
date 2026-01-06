@@ -9,27 +9,68 @@ import (
 
 	"antizapret-admin-panel/internal/api"
 	"antizapret-admin-panel/internal/middleware"
+	"antizapret-admin-panel/internal/repository"
+	"antizapret-admin-panel/internal/service"
+
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 //go:embed frontend/dist/*
 var embeddedFiles embed.FS
 
 func main() {
+	// Загружаем переменные из .env файла.
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Не удалось загрузить .env файл, используются переменные окружения ОС")
+	} else {
+		log.Println("Переменные из .env файла успешно загружены")
+	}
+
 	router := gin.Default()
 
-	// API routes
+	// --- Dependency Injection ---
+	// Здесь мы "собираем" наше приложение вручную.
+
+	// 1. Получаем конфигурацию из переменных окружения
+	vpnClientsPath := os.Getenv("OPENVPN_CLIENTS_PATH")
+	if vpnClientsPath == "" {
+		vpnClientsPath = "mock_fs/root/antizapret/client/openvpn/vpn/" // Значение по умолчанию для разработки
+	}
+	clientScriptPath := os.Getenv("CLIENT_SCRIPT_PATH")
+	if clientScriptPath == "" {
+		clientScriptPath = "./mock_fs/root/antizapret/client.sh"
+	}
+
+	// 2. Создаем Репозиторий
+	clientRepo := repository.NewClientRepository(vpnClientsPath, clientScriptPath)
+
+	// 3. Создаем Сервис, внедряя в него репозиторий
+	clientService := service.NewClientService(clientRepo)
+
+	// 4. Создаем Хендлер, внедряя в него сервис
+	clientHandler := api.NewClientHandler(clientService)
+
+	// --- API Routes ---
 	apiGroup := router.Group("/api")
 	{
 		apiGroup.POST("/login", api.LoginHandler)
 		apiGroup.GET("/check-auth", middleware.AuthMiddleware(), api.CheckAuthHandler)
+		// Публичный маршрут для скачивания файла по токену
+		apiGroup.GET("/download/:token", api.DownloadFileHandler)
 
 		protected := apiGroup.Group("/clients")
 		protected.Use(middleware.AuthMiddleware())
 		{
-			protected.GET("", api.GetClientsHandler)
-			protected.POST("", api.CreateClientHandler)
-			protected.DELETE("/:id", api.DeleteClientHandler)
+			// --- Обновленные роуты ---
+			protected.GET("", clientHandler.GetClients)
+			protected.POST("", clientHandler.CreateClient) // <--- ИЗМЕНЕНО
+			protected.GET("/:id/config", clientHandler.DownloadConfig)
+
+			// --- Старые роуты, которые пока не трогали ---
+			protected.DELETE("/:id", clientHandler.DeleteClient)          // <--- ИЗМЕНЕНО
+			protected.GET("/:id/qr-token", clientHandler.GenerateQRToken) // <--- ИЗМЕНЕНО
 		}
 	}
 
