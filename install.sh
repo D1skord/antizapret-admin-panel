@@ -9,8 +9,8 @@
 
 set -e
 
-# --- Переменные (замените на ваши) ---
-GITHUB_REPO="USERNAME/REPO"
+# --- Переменные ---
+GITHUB_REPO="d1skord/antizapret-admin-panel"
 # ---
 
 # --- Вспомогательные функции ---
