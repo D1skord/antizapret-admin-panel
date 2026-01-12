@@ -22,8 +22,7 @@ frontend/*.sln
 frontend/*.sw?
 
 
-tmp/main
+tmp/*
 bin/air
 .idea
-\n# Файл с переменными окружения для локальной разработки\n.env
 mock_fs/**/*.ovpn
