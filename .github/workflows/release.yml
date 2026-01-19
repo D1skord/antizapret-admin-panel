@@ -9,6 +9,8 @@ jobs:
   build:
     name: Build and Release for Linux
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -41,12 +43,12 @@ jobs:
           # Создаем структуру папок для архива
           mkdir -p release_pack/deploy
           
-          # Копируем бинарник
+          # Копируем бинарник в корень
           cp antizapret-admin-panel release_pack/
           
-          # Копируем сервисные файлы
-          cp deploy/antizapret-admin.service release_pack/
-          cp deploy/uninstall.sh release_pack/
+          # Копируем сервисные файлы в папку deploy
+          cp deploy/antizapret-admin.service release_pack/deploy/
+          cp deploy/uninstall.sh release_pack/deploy/
           
           # (Опционально) Копируем README
           cp README.md release_pack/ || true
@@ -60,6 +62,6 @@ jobs:
         with:
           files: |
             antizapret-admin-linux-amd64.tar.gz
-            install.sh
+            deploy/install.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
