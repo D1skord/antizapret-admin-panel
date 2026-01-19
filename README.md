@@ -17,7 +17,7 @@
 Выполните в терминале сервера:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/d1skord/antizapret-admin-panel/main/install.sh | sudo bash
+curl -sSL https://github.com/d1skord/antizapret-admin-panel/releases/latest/download/install.sh | sudo bash
 ```
 
 После установки панель будет доступна по адресу: `http://<IP-ВАШЕГО-СЕРВЕРА>:8080`
