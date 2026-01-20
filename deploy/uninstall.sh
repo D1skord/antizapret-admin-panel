@@ -3,7 +3,7 @@
 # Скрипт удаления Antizapret Admin Panel
 
 SERVICE_NAME="antizapret-admin.service"
-BINARY_PATH="/usr/local/bin/antizapret-admin"
+BINARY_PATH="/usr/local/bin/antizapret-admin-panel"
 UNINSTALL_SCRIPT_PATH="/usr/local/bin/antizapret-admin-uninstall"
 WORK_DIR="/usr/local/share/antizapret-admin"
 

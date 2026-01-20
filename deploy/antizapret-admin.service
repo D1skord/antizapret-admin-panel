@@ -7,7 +7,7 @@ After=network.target
 Type=simple
 
 # Путь к бинарнику. Скрипт установки положит его сюда.
-ExecStart=/usr/local/bin/antizapret-admin
+ExecStart=/usr/local/bin/antizapret-admin-panel
 
 # Автоматический рестарт при падении
 Restart=always

@@ -37,7 +37,7 @@ fi
 # 2. Настройка пароля
 echo_info "Настройка пароля администратора."
 echo_info "При обновлении, вы можете оставить поле пустым, чтобы использовать существующий пароль."
-read -sp "Введите новый пароль для панели администрирования: " ADMIN_PASSWORD_INPUT
+read -sp "Введите новый пароль для панели администрирования: " ADMIN_PASSWORD_INPUT < /dev/tty
 echo
 
 SERVICE_OVERRIDE_DIR="$SYSTEMD_DIR/$SERVICE_NAME.d"
