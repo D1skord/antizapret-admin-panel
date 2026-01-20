@@ -20,6 +20,12 @@
 curl -sSL https://github.com/d1skord/antizapret-admin-panel/releases/latest/download/install.sh | sudo bash
 ```
 
+Если у вас возникает ошибка при вводе пароля (например, в неинтерактивной среде), используйте команду с заранее заданным паролем:
+
+```bash
+curl -sSL https://github.com/d1skord/antizapret-admin-panel/releases/latest/download/install.sh | sudo ADMIN_PASSWORD="ваш_пароль" bash
+```
+
 После установки панель будет доступна по адресу: `http://<IP-ВАШЕГО-СЕРВЕРА>:8080`
 
 ### Удаление

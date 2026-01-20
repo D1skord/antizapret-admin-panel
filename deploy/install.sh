@@ -34,14 +34,38 @@ if [ -z "$RELEASE_URL" ]; then
     echo_error "Не удалось найти ссылку на релиз (linux-amd64.tar.gz)."
 fi
 
-# 2. Настройка пароля
-echo_info "Настройка пароля администратора."
-echo_info "При обновлении, вы можете оставить поле пустым, чтобы использовать существующий пароль."
-read -sp "Введите новый пароль для панели администрирования: " ADMIN_PASSWORD_INPUT < /dev/tty
-echo
-
 SERVICE_OVERRIDE_DIR="$SYSTEMD_DIR/$SERVICE_NAME.d"
 OVERRIDE_FILE="$SERVICE_OVERRIDE_DIR/env.conf"
+
+# 2. Настройка пароля
+if [ -n "$ADMIN_PASSWORD" ]; then
+    ADMIN_PASSWORD_INPUT="$ADMIN_PASSWORD"
+    echo_info "Используется пароль из переменной окружения ADMIN_PASSWORD."
+else
+    echo_info "Настройка пароля администратора."
+    echo_info "При обновлении, вы можете оставить поле пустым, чтобы использовать существующий пароль."
+    
+    # Пытаемся считать пароль с tty
+    # Используем echo для промпта, чтобы перенаправить stderr read в /dev/null (скрыть ошибки ввода-вывода)
+    echo -n "Введите новый пароль для панели администрирования: "
+    
+    set +e
+    if { read -s ADMIN_PASSWORD_INPUT < /dev/tty; } 2>/dev/null; then
+        echo "" # Перенос строки после ввода
+    else
+        echo "" # Перенос строки
+        # Чтение не удалось (нет TTY или ошибка).
+        if [ -f "$OVERRIDE_FILE" ]; then
+            echo_info "Интерактивный ввод недоступен. Используется существующий пароль."
+            ADMIN_PASSWORD_INPUT=""
+        else
+            echo_error "Ошибка: Не удалось запросить пароль (интерактивный режим недоступен) и переменная ADMIN_PASSWORD не установлена."
+            echo_error "Для первой установки используйте: curl ... | sudo ADMIN_PASSWORD='ваш_пароль' bash"
+            exit 1
+        fi
+    fi
+    set -e
+fi
 
 if [ -n "$ADMIN_PASSWORD_INPUT" ]; then
     mkdir -p "$SERVICE_OVERRIDE_DIR"

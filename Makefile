@@ -65,8 +65,8 @@ build-release:
 	@echo "Building frontend assets..."
 	@cd $(FRONTEND_DIR) && npm install && npm run build
 	@echo "Building Go binary for Linux..."
-	@GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o $(BINARY_NAME)-linux-amd64
-	@echo "Release build complete: ./$(BINARY_NAME)-linux-amd64"
+	@GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o $(BINARY_NAME)
+	@echo "Release build complete: ./$(BINARY_NAME)"
 
 # Dependencies
 install-deps:
