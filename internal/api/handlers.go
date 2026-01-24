@@ -20,6 +20,7 @@ import (
 
 // LoginRequest представляет структуру данных для запроса на вход.
 type LoginRequest struct {
+	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
@@ -228,14 +229,18 @@ func LoginHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	adminUsername := os.Getenv("ADMIN_USERNAME")
+	if adminUsername == "" {
+		adminUsername = "admin"
+	}
 	adminPassword := os.Getenv("ADMIN_PASSWORD")
 	if adminPassword == "" {
-		adminPassword = "admin123"
+		adminPassword = "password"
 	}
-	if req.Password == adminPassword {
+	if req.Username == adminUsername && req.Password == adminPassword {
 		c.JSON(http.StatusOK, gin.H{"token": adminPassword})
 	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid password"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 	}
 }
 

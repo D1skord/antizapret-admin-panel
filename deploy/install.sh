@@ -34,54 +34,99 @@ if [ -z "$RELEASE_URL" ]; then
     echo_error "Не удалось найти ссылку на релиз (linux-amd64.tar.gz)."
 fi
 
+# 2. Настройка учетных данных
 SERVICE_OVERRIDE_DIR="$SYSTEMD_DIR/$SERVICE_NAME.d"
 OVERRIDE_FILE="$SERVICE_OVERRIDE_DIR/env.conf"
 
-# 2. Настройка пароля
+# --- Загрузка существующих значений ---
+EXISTING_USERNAME=""
+EXISTING_PASSWORD=""
+if [ -f "$OVERRIDE_FILE" ]; then
+    # Используем grep, чтобы найти строку, и cut, чтобы получить значение
+    # Удаляем кавычки, которые могут быть вокруг значения
+    EXISTING_USERNAME=$(grep 'ADMIN_USERNAME' "$OVERRIDE_FILE" | cut -d'=' -f2- | tr -d '"')
+    EXISTING_PASSWORD=$(grep 'ADMIN_PASSWORD' "$OVERRIDE_FILE" | cut -d'=' -f2- | tr -d '"')
+    echo_info "Обнаружена существующая конфигурация."
+fi
+
+# --- Интерактивный ввод для Логина ---
+if [ -n "$ADMIN_USERNAME" ]; then
+    ADMIN_USERNAME_INPUT="$ADMIN_USERNAME"
+    echo_info "Используется логин из переменной окружения ADMIN_USERNAME."
+else
+    echo_info "Настройка логина администратора (по умолчанию: admin)."
+    if [ -n "$EXISTING_USERNAME" ]; then
+        echo -n "Введите новый логин (или оставьте пустым, чтобы использовать '$EXISTING_USERNAME'): "
+    else
+        echo -n "Введите логин (или оставьте пустым, чтобы использовать 'admin'): "
+    fi
+    
+    # Пытаемся читать с tty
+    set +e
+    if { read -r ADMIN_USERNAME_INPUT < /dev/tty; } 2>/dev/null; then
+        echo ""
+    else
+        echo "" # Перенос строки после промпта
+        echo_info "Интерактивный ввод недоступен для логина. Используется существующий или значение по умолчанию."
+        ADMIN_USERNAME_INPUT=""
+    fi
+    set -e
+fi
+
+# --- Интерактивный ввод для Пароля ---
 if [ -n "$ADMIN_PASSWORD" ]; then
     ADMIN_PASSWORD_INPUT="$ADMIN_PASSWORD"
     echo_info "Используется пароль из переменной окружения ADMIN_PASSWORD."
 else
     echo_info "Настройка пароля администратора."
-    echo_info "При обновлении, вы можете оставить поле пустым, чтобы использовать существующий пароль."
-    
-    # Пытаемся считать пароль с tty
-    # Используем echo для промпта, чтобы перенаправить stderr read в /dev/null (скрыть ошибки ввода-вывода)
-    echo -n "Введите новый пароль для панели администрирования: "
-    
+    if [ -n "$EXISTING_PASSWORD" ]; then
+        echo -n "Введите новый пароль (или оставьте пустым, чтобы использовать существующий): "
+    else
+        echo -n "Введите новый пароль: "
+    fi
+
     set +e
     if { read -s ADMIN_PASSWORD_INPUT < /dev/tty; } 2>/dev/null; then
-        echo "" # Перенос строки после ввода
+        echo ""
     else
         echo "" # Перенос строки
-        # Чтение не удалось (нет TTY или ошибка).
-        if [ -f "$OVERRIDE_FILE" ]; then
-            echo_info "Интерактивный ввод недоступен. Используется существующий пароль."
-            ADMIN_PASSWORD_INPUT=""
-        else
-            echo_error "Ошибка: Не удалось запросить пароль (интерактивный режим недоступен) и переменная ADMIN_PASSWORD не установлена."
-            echo_error "Для первой установки используйте: curl ... | sudo ADMIN_PASSWORD='ваш_пароль' bash"
-            exit 1
+        if [ ! -f "$OVERRIDE_FILE" ]; then
+            echo_error "Ошибка: Не удалось запросить пароль (интерактивный режим недоступен) и ADMIN_PASSWORD не установлена."
         fi
+        echo_info "Интерактивный ввод недоступен для пароля. Используется существующий пароль."
+        ADMIN_PASSWORD_INPUT=""
     fi
     set -e
 fi
 
-if [ -n "$ADMIN_PASSWORD_INPUT" ]; then
-    mkdir -p "$SERVICE_OVERRIDE_DIR"
-    # Если введен новый пароль, сохраняем его
-    cat > "$OVERRIDE_FILE" << EOF
-[Service]
-Environment="ADMIN_PASSWORD=$ADMIN_PASSWORD_INPUT"
-EOF
-    echo_info "Новый пароль сохранен в конфигурации systemd."
-elif [ ! -f "$OVERRIDE_FILE" ]; then
-    # Если пароль не введен и файла конфигурации нет (первая установка)
-    echo_error "Пароль не может быть пустым при первой установке."
-else
-    echo_info "Пароль не менялся. Используется существующий."
+# --- Определение финальных значений и запись ---
+FINAL_USERNAME=$ADMIN_USERNAME_INPUT
+if [ -z "$FINAL_USERNAME" ]; then
+    FINAL_USERNAME=$EXISTING_USERNAME
+    if [ -z "$FINAL_USERNAME" ]; then
+        FINAL_USERNAME="admin"
+    fi
 fi
 
+FINAL_PASSWORD=$ADMIN_PASSWORD_INPUT
+if [ -z "$FINAL_PASSWORD" ]; then
+    FINAL_PASSWORD=$EXISTING_PASSWORD
+fi
+
+# Проверка, что пароль не пустой при первой установке
+if [ -z "$FINAL_PASSWORD" ]; then
+    echo_error "Пароль не может быть пустым. Установите его через интерактивный ввод или переменную ADMIN_PASSWORD."
+fi
+
+# Создаем директорию и записываем обе переменные
+mkdir -p "$SERVICE_OVERRIDE_DIR"
+cat > "$OVERRIDE_FILE" << EOF
+[Service]
+Environment="ADMIN_USERNAME=$FINAL_USERNAME"
+Environment="ADMIN_PASSWORD=$FINAL_PASSWORD"
+EOF
+
+echo_info "Учетные данные сохранены в конфигурации systemd."
 
 # 3. Скачивание
 TMP_DIR=$(mktemp -d)
@@ -145,5 +190,7 @@ PUBLIC_IP=$(curl -s ifconfig.me || echo "IP-ВАШЕГО-СЕРВЕРА")
 echo_info "---"
 echo_info "Установка/Обновление завершено!"
 echo_info "Панель доступна: http://$PUBLIC_IP:8080"
-echo_info "Пароль администратора: [сохранен в конфигурации сервиса]"
+echo_info "Логин администратора: $FINAL_USERNAME"
+echo_info "Пароль администратора: $FINAL_PASSWORD"
+echo_info "Пожалуйста, сохраните этот пароль в безопасном месте. Он больше не будет показан."
 echo_info "Статус службы: systemctl status $SERVICE_NAME"

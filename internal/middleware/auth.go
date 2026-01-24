@@ -11,7 +11,7 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		adminPassword := os.Getenv("ADMIN_PASSWORD")
 		if adminPassword == "" {
-			adminPassword = "admin123"
+			adminPassword = "password"
 		}
 
 		token := c.GetHeader("X-Auth-Token")
