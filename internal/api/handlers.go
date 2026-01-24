@@ -25,8 +25,9 @@ type LoginRequest struct {
 
 // CreateClientRequest представляет структуру данных для запроса на создание клиента.
 type CreateClientRequest struct {
-	Name string `json:"name" binding:"required"`
-	Type string `json:"type" binding:"required"`
+	Name      string `json:"name" binding:"required"`
+	Type      string `json:"type" binding:"required"`
+	ExpiresIn int    `json:"expires_in,omitempty"`
 }
 
 // --- Управление временными токенами для скачивания ---
@@ -125,7 +126,7 @@ func (h *ClientHandler) CreateClient(c *gin.Context) {
 		return
 	}
 
-	newClient, err := h.service.CreateClient(req.Name)
+	newClient, err := h.service.CreateClient(req.Name, req.ExpiresIn)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create client", "details": err.Error()})
 		return

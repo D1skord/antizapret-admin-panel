@@ -115,6 +115,11 @@
                           <label for="clientName" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Имя клиента</label>
                           <input type="text" id="clientName" v-model="newClientName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="Например, my-client" required>
                         </div>
+                        <div v-if="newClientType === 'openvpn'" class="mb-4">
+                           <label for="clientExpiration" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Срок действия (дней)</label>
+                           <input type="number" id="clientExpiration" v-model="newClientExpiration" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="3650" min="1" max="3650">
+                           <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">От 1 до 3650. По умолчанию: 3650.</p>
+                        </div>
 
                         <div class="mb-4">
                           <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Тип клиента</label>
@@ -194,6 +199,7 @@ const perPage = 10; // or make it a ref if you want it to be dynamic
 const isModalOpen = ref(false);
 const newClientName = ref('');
 const newClientType = ref('openvpn');
+const newClientExpiration = ref(3650); // Срок действия в днях
 const createError = ref(null);
 
 // State for QR Code Modal
@@ -225,13 +231,20 @@ const fetchClients = async (page = 1) => {
 const createClient = async () => {
   createError.value = null;
   try {
-    await api.post('/api/clients', {
+    const payload = {
       name: newClientName.value,
       type: newClientType.value,
-    });
+    };
+
+    if (payload.type === 'openvpn') {
+      payload.expires_in = parseInt(newClientExpiration.value, 10) || 3650;
+    }
+
+    await api.post('/api/clients', payload);
     isModalOpen.value = false;
     newClientName.value = '';
     newClientType.value = 'openvpn';
+    newClientExpiration.value = 3650;
     await fetchClients(1); // Refresh and go to the first page to see the new client
   } catch (err) {
     console.error('Failed to create client:', err);

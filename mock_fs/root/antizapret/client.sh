@@ -40,12 +40,6 @@ askClientName(){
 	fi
 }
 
-# This function is not used in the mock script for client cert expiration
-# but kept for compatibility with the original script's call signature.
-askClientCertExpire(){
-    :
-}
-
 setServerHost_FileName(){
 	if [[ -z "$1" ]]; then
 		SERVER_HOST="$SERVER_IP"
@@ -85,6 +79,10 @@ initOpenVPN(){
 
 addOpenVPN(){
   setServerHost_FileName "$OPENVPN_HOST"
+
+  if [[ -n "$CLIENT_CERT_EXPIRE" ]]; then
+    echo "Mock cert for client '$CLIENT_NAME' will expire in $CLIENT_CERT_EXPIRE days."
+  fi
 
   # Создаем структуру папок (флаг -p создаст вложенные папки и не упадет, если они уже есть)
   mkdir -p "$ROOT_PATH/client/openvpn/"{antizapret,antizapret-udp,antizapret-tcp,vpn,vpn-udp,vpn-tcp}

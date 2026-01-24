@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 )
 
 // ClientRepository — контракт
@@ -17,7 +18,7 @@ type ClientRepository interface {
 	FindAll() ([]entity.Client, error)
 	FindAllPaginated(page, limit int) (*entity.PaginatedClients, error)
 	FindConfigPathByName(name string) (string, error)
-	Create(name string) error
+	Create(name string, expiresIn int) error
 	DeleteByName(name string) error
 }
 
@@ -147,8 +148,13 @@ func (r *fileClientRepository) FindConfigPathByName(name string) (string, error)
 }
 
 // Create
-func (r *fileClientRepository) Create(name string) error {
-	cmd := exec.Command(r.clientScriptPath, "1", name)
+func (r *fileClientRepository) Create(name string, expiresIn int) error {
+	expiresInStr := strconv.Itoa(expiresIn)
+	if expiresIn <= 0 {
+		expiresInStr = "3650"
+	}
+
+	cmd := exec.Command(r.clientScriptPath, "1", name, expiresInStr)
 	log.Printf("Running command: %s", cmd.String())
 
 	output, err := cmd.CombinedOutput()

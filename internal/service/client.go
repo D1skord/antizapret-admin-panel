@@ -14,7 +14,7 @@ type ClientService interface {
 	ListClients() ([]entity.Client, error)
 	ListClientsPaginated(page, limit int) (*entity.PaginatedClients, error)
 	GetClientConfigPath(name string) (string, error)
-	CreateClient(name string) (*entity.Client, error)
+	CreateClient(name string, expiresIn int) (*entity.Client, error)
 	DeleteClient(id int) error
 	GetClientByID(id int) (*entity.Client, error)
 }
@@ -50,8 +50,8 @@ func (s *clientService) GetClientConfigPath(name string) (string, error) {
 }
 
 // CreateClient создает нового клиента.
-func (s *clientService) CreateClient(name string) (*entity.Client, error) {
-	err := s.repo.Create(name)
+func (s *clientService) CreateClient(name string, expiresIn int) (*entity.Client, error) {
+	err := s.repo.Create(name, expiresIn)
 	if err != nil {
 		return nil, err
 	}
