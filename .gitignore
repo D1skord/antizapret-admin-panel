@@ -9,6 +9,7 @@ frontend/lerna-debug.log*
 
 frontend/node_modules
 frontend/dist
+!frontend/dist/index.html
 frontend/dist-ssr
 frontend/*.local
 
@@ -26,3 +27,5 @@ tmp/*
 bin/air
 .idea
 mock_fs/**/*.ovpn
+.claude/
+.gemini/
