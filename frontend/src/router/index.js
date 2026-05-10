@@ -4,6 +4,7 @@ import { useAuthStore } from '../stores/auth';
 
 // Ленивая загрузка (Lazy Loading) - хорошая привычка даже для малых проектов.
 // Компоненты загружаются только когда нужны, ускоряя первую отрисовку.
+const Dashboard = () => import('../views/Dashboard.vue');
 const Clients = () => import('../views/Clients.vue');
 const Login = () => import('../views/Login.vue');
 const Profile = () => import('../views/Profile.vue');
@@ -18,6 +19,12 @@ const routes = [
       {
         path: '',
         name: 'Home',
+        component: Dashboard,
+        meta: { title: 'Главная' },
+      },
+      {
+        path: '/clients',
+        name: 'Clients',
         component: Clients,
         meta: { title: 'Клиенты' },
       },

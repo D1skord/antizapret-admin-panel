@@ -62,6 +62,7 @@ func main() {
 
 	// 4. Создаем Хендлер, внедряя в него сервис
 	clientHandler := api.NewClientHandler(clientService)
+	systemHandler := api.NewSystemHandler()
 
 	// --- API Routes ---
 	apiGroup := router.Group("/api")
@@ -70,6 +71,8 @@ func main() {
 		apiGroup.GET("/check-auth", middleware.AuthMiddleware(), api.CheckAuthHandler)
 		// Публичный маршрут для скачивания файла по токену
 		apiGroup.GET("/download/:token", api.DownloadFileHandler)
+
+		apiGroup.GET("/system/stats", middleware.AuthMiddleware(), systemHandler.GetStats)
 
 		protected := apiGroup.Group("/clients")
 		protected.Use(middleware.AuthMiddleware())

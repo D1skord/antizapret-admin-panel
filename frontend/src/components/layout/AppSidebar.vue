@@ -83,6 +83,33 @@
                         : 'menu-item-icon-inactive',
                     ]"
                   >
+                    <PieChartIcon />
+                  </span>
+                  <span
+                    v-if="isExpanded || isHovered || isMobileOpen"
+                    class="menu-item-text"
+                    >Главная</span
+                  >
+                </router-link>
+              </li>
+              <li>
+                <router-link
+                  to="/clients"
+                  :class="[
+                    'menu-item group',
+                    {
+                      'menu-item-active': isActive('/clients'),
+                      'menu-item-inactive': !isActive('/clients'),
+                    },
+                  ]"
+                >
+                  <span
+                    :class="[
+                      isActive('/clients')
+                        ? 'menu-item-icon-active'
+                        : 'menu-item-icon-inactive',
+                    ]"
+                  >
                     <GridIcon />
                   </span>
                   <span
@@ -157,7 +184,7 @@
 
 <script setup>
 import { useRoute } from "vue-router";
-import { GridIcon, HorizontalDots, UserCircleIcon, SettingsIcon } from "@/icons";
+import { GridIcon, HorizontalDots, UserCircleIcon, SettingsIcon, PieChartIcon } from "@/icons";
 import SidebarWidget from "./SidebarWidget.vue";
 import { useSidebar } from "@/composables/useSidebar";
 
