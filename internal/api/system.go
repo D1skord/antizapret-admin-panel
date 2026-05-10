@@ -3,9 +3,11 @@ package api
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"math"
 	"net/http"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -181,6 +183,16 @@ func getUptimeAndLoad() (uptime, load1, load5, load15 float64, err error) {
 		load15, _ = strconv.ParseFloat(loadFields[2], 64)
 	}
 	return
+}
+
+func (h *SystemHandler) Reboot(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "rebooting"})
+	go func() {
+		time.Sleep(500 * time.Millisecond)
+		if err := exec.Command("reboot").Run(); err != nil {
+			log.Printf("reboot error: %v", err)
+		}
+	}()
 }
 
 func (h *SystemHandler) GetStats(c *gin.Context) {

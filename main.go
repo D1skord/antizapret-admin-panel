@@ -73,6 +73,7 @@ func main() {
 		apiGroup.GET("/download/:token", api.DownloadFileHandler)
 
 		apiGroup.GET("/system/stats", middleware.AuthMiddleware(), systemHandler.GetStats)
+		apiGroup.POST("/system/reboot", middleware.AuthMiddleware(), systemHandler.Reboot)
 
 		protected := apiGroup.Group("/clients")
 		protected.Use(middleware.AuthMiddleware())
