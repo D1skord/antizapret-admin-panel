@@ -1,4 +1,5 @@
 FROM golang:1.25-alpine
 WORKDIR /app
+RUN apk add --no-cache bash curl
 RUN go install github.com/air-verse/air@latest
 CMD ["air"]
