@@ -1,7 +1,7 @@
 <template>
   <aside
     :class="[
-      'fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-40 border-r border-gray-200',
+      'fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200',
       {
         'lg:w-[290px]': isExpanded || isMobileOpen || isHovered,
         'lg:w-[90px]': !isExpanded && !isHovered,
@@ -183,14 +183,19 @@
 </template>
 
 <script setup>
+import { watch } from "vue";
 import { useRoute } from "vue-router";
 import { GridIcon, HorizontalDots, UserCircleIcon, SettingsIcon, PieChartIcon } from "@/icons";
 import SidebarWidget from "./SidebarWidget.vue";
 import { useSidebar } from "@/composables/useSidebar";
 
 const route = useRoute();
-const { isExpanded, isMobileOpen, isHovered } = useSidebar();
+const { isExpanded, isMobileOpen, isHovered, toggleMobileSidebar } = useSidebar();
 const isActive = (path) => route.path === path;
+
+watch(() => route.path, () => {
+  if (isMobileOpen.value) toggleMobileSidebar();
+});
 </script>
 
 <style>
