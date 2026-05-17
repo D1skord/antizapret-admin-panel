@@ -25,9 +25,6 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies
-        run: make install-deps
-
       - name: Build Frontend
         run: |
           cd frontend
