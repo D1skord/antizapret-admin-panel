@@ -25,6 +25,7 @@ frontend/*.sw?
 
 tmp/*
 bin/air
+antizapret-admin-panel
 .idea
 mock_fs/**/*.ovpn
 .claude/
